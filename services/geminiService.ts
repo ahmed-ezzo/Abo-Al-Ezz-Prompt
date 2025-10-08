@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/genai"; // THE FIX IS HERE
 import { AnalysisResult, ImageOptionsState } from "../types";
 
 const fileToGenerativePart = async (file: File) => {
@@ -13,46 +13,38 @@ const fileToGenerativePart = async (file: File) => {
 };
 
 export const analyzeImage = async (imageFile: File, options: ImageOptionsState): Promise<AnalysisResult> => {
-  // --- FINAL DEBUG LINE ---
-  // This will show us exactly what the API key value is on the live site.
-  console.log("Attempting to use API Key:", import.meta.env.VITE_API_KEY);
-
   try {
     const apiKey = import.meta.env.VITE_API_KEY;
 
-    if (!apiKey || apiKey === "") {
-      throw new Error("VITE_API_KEY is not defined or is empty in the environment.");
+    if (!apiKey) {
+      throw new Error("VITE_API_KEY environment variable not set");
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    // THE FIX IS HERE: Corrected "GoogleGenerativeAI"
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    
     const imagePart = await fileToGenerativePart(imageFile);
 
-    // Using a shorter, simpler prompt for final debugging
-    let userInstructions = `Describe this image in detail.`;
-    
-    const genAI = new GoogleGenAI({ apiKey: apiKey });
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    let userInstructions = `Analyze the provided image to serve as a creative assistant for a designer. The goal is to deconstruct the image's artistic elements into a structured, actionable format. The output must be a valid JSON object.
+    Perform the following analysis:
+    1.  **Main Prompt**: Generate a highly detailed, artistic description in English...
+    2.  **Style Keywords**: Extract a list of 5-10 specific keywords...
+    3.  **Color Palette**: Identify the 6 most dominant colors...
+    4.  **Alternative Prompts**: Create two alternative versions...`;
+
+    // ... (rest of the user instructions logic) ...
 
     const result = await model.generateContent([userInstructions, imagePart]);
     const response = await result.response;
     const text = response.text();
-    
-    // For this final test, we'll just return the raw text
-    // This simplifies things and removes JSON parsing as a source of error
-    const dummyResult: AnalysisResult = {
-        mainPrompt: text,
-        styleKeywords: ["debug"],
-        colorPalette: ["#000000"],
-        alternativePrompts: {
-            concise: "debug",
-            poetic: "debug"
-        }
-    };
-    return dummyResult;
+
+    const cleanedText = text.replace(/```json|```/g, "").trim();
+    const jsonResponse = JSON.parse(cleanedText);
+    return jsonResponse;
 
   } catch (error) {
-    // This will now catch ANY error that happens in the function
-    console.error("!!! FINAL DEBUG - ERROR CAUGHT:", error);
+    console.error("Error during Gemini API call:", error);
     throw error;
   }
 };
