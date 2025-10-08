@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/genai"; // THE FIX IS HERE
+import { GoogleGenerativeAI } from "@google/genai";
 import { AnalysisResult, ImageOptionsState } from "../types";
 
 const fileToGenerativePart = async (file: File) => {
@@ -20,9 +20,12 @@ export const analyzeImage = async (imageFile: File, options: ImageOptionsState):
       throw new Error("VITE_API_KEY environment variable not set");
     }
 
-    // THE FIX IS HERE: Corrected "GoogleGenerativeAI"
-    const genAI = new GoogleGenerativeAI(apiKey);
+    // --- THIS IS THE CORRECTED PART ---
+    // 1. Correctly instantiate the main class
+    const genAI = new GoogleGenerativeAI(apiKey); 
+    // 2. Get the specific model from that instance
     const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+    // --- END OF CORRECTION ---
     
     const imagePart = await fileToGenerativePart(imageFile);
 
@@ -32,8 +35,8 @@ export const analyzeImage = async (imageFile: File, options: ImageOptionsState):
     2.  **Style Keywords**: Extract a list of 5-10 specific keywords...
     3.  **Color Palette**: Identify the 6 most dominant colors...
     4.  **Alternative Prompts**: Create two alternative versions...`;
-
-    // ... (rest of the user instructions logic) ...
+    
+    // (Your user instructions logic for options can be added back here if needed)
 
     const result = await model.generateContent([userInstructions, imagePart]);
     const response = await result.response;
