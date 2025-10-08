@@ -1,3 +1,38 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import Header from './components/Header';
+import ImageUploader from './components/ImageUploader';
+import ImageOptions from './components/ImageOptions';
+import ResultDisplay from './components/ResultDisplay';
+import Footer from './components/Footer';
+import { analyzeImage } from './services/geminiService';
+import { Language, AnalysisResult, ImageOptionsState, Theme } from './types';
+import { translations } from './constants';
+import { SparklesIcon, PencilIcon, PaletteIcon, LightbulbIcon, ArrowLeftIcon } from './components/icons';
+
+const HowItWorks: React.FC<{translations: any}> = ({translations}) => (
+    <div className="w-full max-w-5xl mx-auto mt-16 text-center">
+        <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-8">{translations.howItWorksTitle}</h2>
+        <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <PencilIcon className="w-8 h-8 mx-auto mb-4 text-[#0017f1]" />
+                <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">{translations.step1Title}</h3>
+                <p className="text-zinc-600 dark:text-zinc-400">{translations.step1Description}</p>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <PaletteIcon className="w-8 h-8 mx-auto mb-4 text-[#0017f1]" />
+                <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">{translations.step2Title}</h3>
+                <p className="text-zinc-600 dark:text-zinc-400">{translations.step2Description}</p>
+            </div>
+            <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
+                <LightbulbIcon className="w-8 h-8 mx-auto mb-4 text-[#0017f1]" />
+                <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-zinc-100">{translations.step3Title}</h3>
+                <p className="text-zinc-600 dark:text-zinc-400">{translations.step3Description}</p>
+            </div>
+        </div>
+    </div>
+);
+
+
 const App: React.FC = () => {
   // --- BEGIN: CODE TO FIX HYDRATION ERROR ---
   const [isClient, setIsClient] = useState(false);
@@ -176,4 +211,5 @@ const App: React.FC = () => {
     </>
   );
 };
+
 export default App;
