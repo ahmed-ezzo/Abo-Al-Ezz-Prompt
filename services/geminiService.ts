@@ -16,14 +16,14 @@ export const analyzeImage = async (imageFile: File, options: ImageOptionsState):
   try {
     const apiKey = import.meta.env.VITE_API_KEY;
     if (!apiKey) {
-      throw new Error("VITE_API_KEY is not configured in Vercel/Netlify.");
+      throw new Error("VITE_API_KEY is not configured. Check Vercel environment variables.");
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
     const imagePart = await fileToGenerativePart(imageFile);
 
-    const prompt = `Analyze this image in detail and provide a structured JSON output with keys: "mainPrompt", "styleKeywords", "colorPalette", and "alternativePrompts".`;
+    const prompt = `Analyze this image in detail and provide a structured JSON output with keys: "mainPrompt", "styleKeywords", "colorPalette", and "alternativePrompts". Be artistic and descriptive.`;
 
     const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
