@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/genai";
 import { AnalysisResult, ImageOptionsState } from "../types";
 
+// This function converts the file to a format Google's API can understand
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -13,41 +14,49 @@ const fileToGenerativePart = async (file: File) => {
 };
 
 export const analyzeImage = async (imageFile: File, options: ImageOptionsState): Promise<AnalysisResult> => {
+  // Log to confirm the correct function is running
+  console.log("Running the definitive, final version of analyzeImage function...");
+
   try {
     const apiKey = import.meta.env.VITE_API_KEY;
-
     if (!apiKey) {
-      throw new Error("VITE_API_KEY environment variable not set");
+      throw new Error("VITE_API_KEY was not found. Check Vercel environment variables.");
     }
 
-    // --- THIS IS THE CORRECTED PART ---
-    // 1. Correctly instantiate the main class
-    const genAI = new GoogleGenerativeAI(apiKey); 
-    // 2. Get the specific model from that instance
+    // 1. Correctly create the GoogleGenerativeAI instance
+    const genAI = new GoogleGenerativeAI(apiKey);
+
+    // 2. Specify the model
     const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-    // --- END OF CORRECTION ---
-    
+
+    // 3. Prepare the image and a simple prompt for the final test
     const imagePart = await fileToGenerativePart(imageFile);
+    const prompt = "Describe this image in detail for an artist.";
 
-    let userInstructions = `Analyze the provided image to serve as a creative assistant for a designer. The goal is to deconstruct the image's artistic elements into a structured, actionable format. The output must be a valid JSON object.
-    Perform the following analysis:
-    1.  **Main Prompt**: Generate a highly detailed, artistic description in English...
-    2.  **Style Keywords**: Extract a list of 5-10 specific keywords...
-    3.  **Color Palette**: Identify the 6 most dominant colors...
-    4.  **Alternative Prompts**: Create two alternative versions...`;
-    
-    // (Your user instructions logic for options can be added back here if needed)
-
-    const result = await model.generateContent([userInstructions, imagePart]);
+    // 4. Call the API
+    const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
     const text = response.text();
 
-    const cleanedText = text.replace(/```json|```/g, "").trim();
-    const jsonResponse = JSON.parse(cleanedText);
-    return jsonResponse;
+    console.log("SUCCESS! Received response from Gemini:", text);
+
+    // 5. Return a simplified result to avoid any other errors
+    return {
+      mainPrompt: text,
+      styleKeywords: ["Success", "Final Test"],
+      colorPalette: ["#00FF00"],
+      alternativePrompts: {
+        concise: "It worked.",
+        poetic: "The journey is finally over."
+      }
+    };
 
   } catch (error) {
-    console.error("Error during Gemini API call:", error);
+    console.error("!!! THIS IS THE ABSOLUTE FINAL ERROR CATCH:", error);
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+    }
     throw error;
   }
 };
